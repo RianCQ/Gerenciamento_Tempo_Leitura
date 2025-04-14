@@ -12,8 +12,7 @@ public class TempoLeitura {
     private LocalDate dataFinal; // Data final da leitura 
 
     public TempoLeitura(Livro livro) {
-        //DecimalFormat df = new DecimalFormat("#.##");
-        this.cargaHoraria = /*Double.parseDouble(df.format(*/livro.getNumeroPaginas() * (40.0/60.0); // Inicializa e calcula a carga horária total de leitura em minutos
+        this.cargaHoraria = livro.getNumeroPaginas() * (40.0/60.0); // Inicializa e calcula a carga horária total de leitura em minutos
         BigDecimal bd = new BigDecimal(cargaHoraria).setScale(2, RoundingMode.HALF_UP);
         this.cargaHoraria = bd.doubleValue();
         this.dataInicio = LocalDate.now(); // Data atual
