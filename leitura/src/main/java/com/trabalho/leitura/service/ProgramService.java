@@ -12,17 +12,21 @@ import com.trabalho.leitura.repository.LivroRepository;
 
 @Service
 public class ProgramService {
+    // Injeção de dependências para os repositórios de cliente e livro
     private final ClienteRepository clienteRepository;
     private final LivroRepository livroRepository;
 
+    // Construtor da classe que recebe os repositórios como parâmetros
     public ProgramService(ClienteRepository clienteRepository, LivroRepository livroRepository) {
         this.clienteRepository = clienteRepository;
         this.livroRepository = livroRepository;
     }
+    // Método que retorna todos os livros de um cliente específico
     public Map<Long, Livro> findLivrosByClienteId(Long clienteId) {
         Cliente cliente = clienteRepository.buscarClientePorId(clienteId);
         return cliente.getLivros(); // Retorna a lista de livros do cliente
     }
+    // Método que cria um novo livro para um cliente específico
     public Livro criarLivroParaCliente(Long clienteId, Livro livro) {
         try{
             Cliente cliente = clienteRepository.buscarClientePorId(clienteId);
@@ -44,11 +48,13 @@ public class ProgramService {
             throw new RuntimeException("Erro ao criar livro para cliente: " + e.getMessage(), e); // Lança exceção se ocorrer erro
         }
     }
+    // Método que busca um livro específico de um cliente com base no ID do cliente e do livro
     public Livro buscarLivroPorId(Long idCliente, Long idLivro) {
         Cliente cliente = clienteRepository.buscarClientePorId(idCliente);
         Livro livro = cliente.getLivros().get(idLivro); // Busca o livro pelo ID
         return livro; // Retorna o livro do cliente
     }
+    // Método que atualiza o status de leitura de um livro específico de um cliente com base no ID do cliente e do livro
     public Livro atualizarStatusLivro(Long idCliente, Long idLivro) {
         Cliente cliente = clienteRepository.buscarClientePorId(idCliente);
         if (cliente == null) {
@@ -60,6 +66,7 @@ public class ProgramService {
         clienteRepository.atualizarCliente(cliente); // Atualiza o cliente no repositório
         return livro; // Retorna o livro atualizado
     }
+    // Método que atualiza a data de leitura de um livro específico de um cliente com base no ID do cliente e do livro
     public Livro atualizarDataLeitura(Long clienteId, Long livroId) {
         Cliente cliente = clienteRepository.buscarClientePorId(clienteId);
         // Verifica se o cliente existe
@@ -69,18 +76,12 @@ public class ProgramService {
         Livro livro = cliente.getLivros().get(livroId); // Busca o livro pelo ID
         TempoLeitura newTime = new TempoLeitura(livro); // Cria um novo objeto TempoLeitura
         livro.setTempo(newTime); // Atualiza a data de leitura do livro
-        cliente.setLivro(livro);
+        cliente.setLivro(livro); // Atualiza o livro do cliente
         clienteRepository.atualizarCliente(cliente); // Atualiza o cliente no repositório
         return livro; // Retorna o livro atualizado
         }
     }
-    public void atualizarStatus(Long clienteId, Long livroId) {
-        Cliente cliente = clienteRepository.buscarClientePorId(clienteId);
-        Livro livro = cliente.getLivros().get(livroId); // Busca o livro pelo ID
-        livro.marcarComoLido(); // Marca o livro como lido
-        cliente.setLivro(livro); // Atualiza o livro do cliente
-        clienteRepository.atualizarCliente(cliente); // Atualiza o cliente no repositório
-    }
+    // Método que remove um livro específico de um cliente com base no ID do cliente e do livro
     public void deleteLivroParaCliente(Long idCliente, Long idLivro) {
         clienteRepository.buscarClientePorId(idCliente).removerLivro(livroRepository.buscarLivroPorId(idLivro)); // Remove o livro do cliente
     }

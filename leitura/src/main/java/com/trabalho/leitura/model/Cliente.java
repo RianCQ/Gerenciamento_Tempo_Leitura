@@ -26,15 +26,15 @@ public class Cliente {
     }
 
     public String getNome() {
-        return nome;
+        return nome; // Retorna o nome do cliente
     }
 
     public String getEmail() {
-        return email;
+        return email; // Retorna o email do cliente
     }
 
     public Double getCargaDiaria() {
-        return cargaDiaria;
+        return cargaDiaria; // Retorna a carga horária diária de leitura
     }
 
     public void setCargaDiaria(Double cargaDiaria) {

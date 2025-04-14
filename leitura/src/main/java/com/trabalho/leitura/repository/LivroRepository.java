@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @Repository
 // Esta classe é responsável por gerenciar os dados dos livros
 public class LivroRepository {
+    // Mapa que armazena os livros com o ID como chave
+    // O ID é gerado automaticamente para cada livro novo adicionado
     private final Map<Long, Livro> livros = new HashMap<>();
     private final AtomicLong idCounter = new AtomicLong(1); // Contador para gerar IDs únicos para os livros
 
