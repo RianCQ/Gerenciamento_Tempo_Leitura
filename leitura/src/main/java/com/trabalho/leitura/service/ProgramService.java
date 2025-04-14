@@ -30,7 +30,7 @@ public class ProgramService {
                 throw new IllegalArgumentException("Cliente não encontrado"); // Lança exceção se o cliente não for encontrado
             }
             // Verifica se o livro já existe no repositório
-            Livro livroExistente = livroRepository.buscarLivroPorTituloEAutor(livro.getTitulo(), livro.getAutor(), livro.getEditora(), livro.getAnoPublicacao());
+            Livro livroExistente = livroRepository.verificarLivros(livro.getTitulo(), livro.getAutor(), livro.getEditora(), livro.getAnoPublicacao());
             if(livroExistente != null){
                 livro.setId(livroExistente.getId()); // Se o livro já existe, reutiliza o ID existente
             } else{

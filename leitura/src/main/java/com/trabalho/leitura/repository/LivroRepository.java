@@ -44,7 +44,7 @@ public class LivroRepository {
     }
 
     // Método que busca um livro específico com base no título e autor
-    public Livro buscarLivroPorTituloEAutor(String titulo, String autor, String editora, Integer anoPublicacao) {
+    public Livro verificarLivros(String titulo, String autor, String editora, Integer anoPublicacao) {
         return livros.values().stream()
                 .filter(livro -> livro.getTitulo().equalsIgnoreCase(titulo) && livro.getAutor().equalsIgnoreCase(autor) && livro.getEditora().equalsIgnoreCase(editora) && livro.getAnoPublicacao() == anoPublicacao)
                 .findFirst()
