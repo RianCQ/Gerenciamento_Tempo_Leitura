@@ -43,6 +43,14 @@ public class LivroRepository {
         return null; // Retorna null se o livro não foi encontrado
     }
 
+    // Método que busca um livro específico com base no título e autor
+    public Livro buscarLivroPorTituloEAutor(String titulo, String autor, String editora, Integer anoPublicacao) {
+        return livros.values().stream()
+                .filter(livro -> livro.getTitulo().equalsIgnoreCase(titulo) && livro.getAutor().equalsIgnoreCase(autor) && livro.getEditora().equalsIgnoreCase(editora) && livro.getAnoPublicacao() == anoPublicacao)
+                .findFirst()
+                .orElse(null);
+    }
+
     //Método que remove um livro existente com base no ID
     public void delete(Long id){
         livros.remove(id);

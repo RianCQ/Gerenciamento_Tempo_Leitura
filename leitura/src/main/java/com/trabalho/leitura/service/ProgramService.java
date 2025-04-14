@@ -29,11 +29,15 @@ public class ProgramService {
             if(cliente == null){
                 throw new IllegalArgumentException("Cliente não encontrado"); // Lança exceção se o cliente não for encontrado
             }
-            if(livroRepository.buscarLivroPorId(livro.getId()) == null){
+            // Verifica se o livro já existe no repositório
+            Livro livroExistente = livroRepository.buscarLivroPorTituloEAutor(livro.getTitulo(), livro.getAutor(), livro.getEditora(), livro.getAnoPublicacao());
+            if(livroExistente != null){
+                livro.setId(livroExistente.getId()); // Se o livro já existe, reutiliza o ID existente
+            } else{
                 livroRepository.adicionarLivro(livro); // Adiciona o livro ao repositório se não existir
             }
             cliente.addLivro(livro); // Associa o livro ao cliente
-            livro.setDono(cliente); // Associa o cliente como dono do livro
+            livro.setDono(cliente); // Define o cliente como dono do livro
             livro.setTempo(new TempoLeitura(livro));
             return livro; // Se o livro já existe, retorna o livro existente
         }catch(Exception e){
