@@ -2,14 +2,20 @@ package com.trabalho.leitura.model;
 
 import java.time.LocalDate;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class TempoLeitura {
     // Atributos do tempo de leitura
-    private double cargaHoraria; // Tempo de leitura total em minutos
-    private LocalDate dataInicio; // Data de início da leitura no formato "dd/MM/yyyy"
-    private LocalDate dataFinal; // Data final da leitura no formato "dd/MM/yyyy"
+    private double cargaHoraria; // Tempo necessário de leitura total em minutos
+    private LocalDate dataInicio; // Data de início da leitura 
+    private LocalDate dataFinal; // Data final da leitura 
 
     public TempoLeitura(Livro livro) {
-        this.cargaHoraria = livro.getNumeroPaginas() * (40.0/60.0) ; // Inicializa e calcula a carga horária total de leitura em minutos
+        //DecimalFormat df = new DecimalFormat("#.##");
+        this.cargaHoraria = /*Double.parseDouble(df.format(*/livro.getNumeroPaginas() * (40.0/60.0); // Inicializa e calcula a carga horária total de leitura em minutos
+        BigDecimal bd = new BigDecimal(cargaHoraria).setScale(2, RoundingMode.HALF_UP);
+        this.cargaHoraria = bd.doubleValue();
         this.dataInicio = LocalDate.now(); // Data atual
         this.dataFinal = dataInicio.plusDays((long)(cargaHoraria/livro.getDono().getCargaDiaria())); // Data de término da leitura
     }
