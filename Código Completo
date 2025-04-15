@@ -1,0 +1,492 @@
+package com.trabalho.leitura.model;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class Cliente {
+    private Long id; // ID do cliente
+    private String nome;
+    private String email;
+    private Double cargaDiaria; // Carga horária diária de leitura para um livro em minutos
+    private Map<Long,Livro> livros; // Lista de livros do cliente
+
+    public Cliente(String nome, String email, Double cargaDiaria) {
+        this.nome = nome;
+        this.email = email;
+        this.cargaDiaria = cargaDiaria; // Inicializa a carga horária diária de leitura
+        this.livros = new HashMap<>();
+    }
+
+    public Long getId() {
+        return id.longValue(); // Retorna o ID do cliente
+    }
+
+    public void setId(Long id) {
+        this.id = id; // Atualiza o ID do cliente
+    }
+
+    public String getNome() {
+        return nome; // Retorna o nome do cliente
+    }
+
+    public String getEmail() {
+        return email; // Retorna o email do cliente
+    }
+
+    public Double getCargaDiaria() {
+        return cargaDiaria; // Retorna a carga horária diária de leitura
+    }
+
+    public void setCargaDiaria(Double cargaDiaria) {
+        this.cargaDiaria = cargaDiaria; // Atualiza a carga horária diária de leitura
+    }
+
+    public Map<Long, Livro> getLivros() {
+        return livros; // Retorna a lista de livros do cliente
+    }
+    public void addLivro(Livro livro) {
+        if(!this.livros.containsKey(livro.getId())){ // Verifica se o livro já está na lista
+            this.livros.put(livro.getId(), livro); // Adiciona um livro à lista de livros do cliente
+            livro.setDono(this); // Associa o cliente como dono do livro
+        }
+    }
+    public void setLivro(Livro livro) {
+        if (this.livros.containsKey(livro.getId())) { // Verifica se o livro já está na lista
+            this.livros.put(livro.getId(), livro); // Atualiza o livro na lista de livros do cliente
+            livro.setDono(this); // Associa o cliente como dono do livro
+        }
+    }
+    public void removerLivro(Livro livro) {
+        if (this.livros.containsKey(livro.getId())) { // Verifica se o livro está na lista
+            this.livros.remove(livro.getId()); // Remove o livro da lista de livros do cliente
+            livro.setDono(null); // Remove a associação do cliente com o livro
+        }
+    }
+}
+package com.trabalho.leitura.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public class Livro {
+    // Atributos do livro
+    @JsonIgnore // Ignora o campo dono durante a serialização/deserialização
+    private Cliente dono;
+    private Long id;
+    private String titulo;
+    private String autor;
+    private String editora;
+    private Integer anoPublicacao;
+    private Integer numeroPaginas;
+    private TempoLeitura tempo; // Tempo de leitura compõem o livro
+    private boolean lido; // Indica se o livro foi lido ou não pelo cliente
+
+    public Livro(String titulo, String autor, String editora, Integer anoPublicacao, Integer numeroPaginas) {
+        this.titulo = titulo;
+        this.autor = autor;
+        this.editora = editora;
+        this.anoPublicacao = anoPublicacao;
+        this.numeroPaginas = numeroPaginas;
+        this.tempo = new TempoLeitura(this); // Inicializa o tempo de leitura com base no livro
+        this.lido = false; // Inicialmente, o livro não foi lido
+    }
+    public Livro() {
+        // Construtor padrão necessário para a desserialização
+    }
+    public Cliente getDono() {
+        return dono; // Retorna o cliente que possui o livro
+    }
+    public void setDono(Cliente dono) {
+        this.dono = dono; // Atualiza o cliente que possui o livro
+    }
+    public Long getId() {
+        return id; // Retorna o ID do livro
+    }
+    public void setId(Long id){
+        this.id = id; // Atualiza o ID do livro
+    }
+    public String getTitulo() {
+        return titulo; // Retorna o título do livro
+    }
+    public String getAutor() {
+        return autor; // Retorna o autor do livro
+    }
+    public String getEditora() {
+        return editora; // Retorna a editora do livro
+    }
+    public int getAnoPublicacao() {
+        return anoPublicacao; // Retorna o ano de publicação do livro
+    }
+    public int getNumeroPaginas() {
+        return numeroPaginas; // Retorna o número de páginas do livro
+    }
+    public TempoLeitura getTempo() {
+        return tempo; // Retorna o tempo que compõe o livro
+    }
+    public void setTempo(TempoLeitura tempo) {
+        this.tempo = tempo; // Atualiza o tempo de leitura do livro
+    }
+    public boolean isLido() {
+        return lido; // Retorna se o livro foi lido ou não
+    }
+    public void marcarComoLido() {
+        this.lido = true; // Marca o livro como lido
+    }
+}
+package com.trabalho.leitura.model;
+
+import java.time.LocalDate;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+public class TempoLeitura {
+    // Atributos do tempo de leitura
+    private double cargaHoraria; // Tempo necessário de leitura total em minutos
+    private LocalDate dataInicio; // Data de início da leitura 
+    private LocalDate dataFinal; // Data final da leitura 
+
+    public TempoLeitura(Livro livro) {
+        this.cargaHoraria = livro.getNumeroPaginas() * (40.0/60.0); // Inicializa e calcula a carga horária total de leitura em minutos
+        BigDecimal bd = new BigDecimal(cargaHoraria).setScale(2, RoundingMode.HALF_UP);
+        this.cargaHoraria = bd.doubleValue();
+        this.dataInicio = LocalDate.now(); // Data atual
+        this.dataFinal = dataInicio.plusDays((long)(cargaHoraria/livro.getDono().getCargaDiaria())); // Data de término da leitura
+    }
+
+    public void novaDataFinal(Livro livro) {
+        this.dataInicio = LocalDate.now(); // Data atual
+        this.dataFinal = dataInicio.plusDays((long)(cargaHoraria/livro.getDono().getCargaDiaria())); // Data de término da leitura
+    }
+
+    public double getTempoLeitura() {
+        return cargaHoraria; // Retorna o tempo de leitura total em minutos
+    }
+    public LocalDate getDataInicio() {
+        return dataInicio; // Retorna a data de início da leitura
+    }
+    public LocalDate getDataFinal() {
+        return dataFinal; // Retorna a data final da leitura
+    }
+}
+package com.trabalho.leitura.repository;
+
+import org.springframework.stereotype.Repository;
+import com.trabalho.leitura.model.Cliente;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
+@Repository
+// Esta classe é responsável por gerenciar os dados de clientes
+public class ClienteRepository {
+    private static final Map<Long, Cliente> clientes = new HashMap<>();
+    private final AtomicLong idCounter = new AtomicLong(1); // Contador para gerar IDs únicos para os clientes
+
+    // Método que retorna uma lista com todos os clientes cadastrados
+    public List<Cliente> listarClientes() {
+        return new ArrayList<>(clientes.values());
+    }
+
+    // Método que retorna um cliente específico com base no ID
+    public Cliente buscarClientePorId(Long id) {
+        return clientes.get(id);
+    }
+
+    // Método que adiciona um novo cliente ao repositório
+    public Cliente adicionarCliente(Cliente cliente) {
+        cliente.setId(idCounter.getAndIncrement()); // Gera um novo ID único
+        if(cliente.getId() == null){
+            cliente.setId(idCounter.getAndIncrement()); // Gera um novo ID único
+        }
+        clientes.put(cliente.getId(), cliente); // Adiciona o cliente ao repositório com o ID gerado
+        return cliente; // Retorna o cliente adicionado
+    }
+
+    // Método que atualiza um cliente existente com base no ID
+    public Cliente atualizarCliente(Cliente clienteAtualizado) {
+        if (clientes.containsKey(clienteAtualizado.getId())) { // Verifica se o cliente existe
+            clientes.put(clienteAtualizado.getId(), clienteAtualizado); // Atualiza o cliente no repositório
+            return clienteAtualizado; // Retorna o cliente atualizado
+        }
+        return null; // Retorna null se o cliente não foi encontrado
+    }
+
+    //Método que remove um cliente existente com base no ID
+    public void delete(Long id){
+        clientes.remove(id);
+    }
+}
+package com.trabalho.leitura.repository;
+
+import org.springframework.stereotype.Repository;
+import com.trabalho.leitura.model.Livro;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
+@Repository
+// Esta classe é responsável por gerenciar os dados dos livros
+public class LivroRepository {
+    // Mapa que armazena os livros com o ID como chave
+    // O ID é gerado automaticamente para cada livro novo adicionado
+    private final Map<Long, Livro> livros = new HashMap<>();
+    private final AtomicLong idCounter = new AtomicLong(1); // Contador para gerar IDs únicos para os livros
+
+    // Método que retorna uma lista com todos os livros cadastrados
+    public List<Livro> listarLivros() {
+        return new ArrayList<>(livros.values());
+    }
+
+    // Método que retorna um livro específico com base no ID
+    public Livro buscarLivroPorId(Long id) {
+        return livros.get(id);
+    }
+
+    // Método que adiciona um novo livro ao repositório
+    public Livro adicionarLivro(Livro livro) {
+        if(livro.getId() == null){
+            livro.setId(idCounter.getAndIncrement()); // Gera um novo ID único
+        }
+        livros.put(livro.getId(), livro); // Adiciona o livro ao repositório com o ID gerado
+        return livro; // Retorna o livro adicionado
+    }
+
+    // Método que atualiza um livro existente com base no ID
+    public Livro atualizarLivro(Livro livroAtualizado) {
+        if (livros.containsKey(livroAtualizado.getId())) { // Verifica se o livro existe
+            livros.put(livroAtualizado.getId(), livroAtualizado); // Atualiza o livro no repositório
+            return livroAtualizado; // Retorna o livro atualizado
+        }
+        return null; // Retorna null se o livro não foi encontrado
+    }
+
+    // Método que busca um livro específico com base no título e autor
+    public Livro verificarLivros(String titulo, String autor, String editora, Integer anoPublicacao) {
+        return livros.values().stream()
+                .filter(livro -> livro.getTitulo().equalsIgnoreCase(titulo) && livro.getAutor().equalsIgnoreCase(autor) && livro.getEditora().equalsIgnoreCase(editora) && livro.getAnoPublicacao() == anoPublicacao)
+                .findFirst()
+                .orElse(null);
+    }
+
+    //Método que remove um livro existente com base no ID
+    public void delete(Long id){
+        livros.remove(id);
+    }
+}
+package com.trabalho.leitura.controller;
+
+import com.trabalho.leitura.model.Cliente;
+import com.trabalho.leitura.model.Livro;
+import com.trabalho.leitura.repository.ClienteRepository;
+import com.trabalho.leitura.service.ProgramService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/clientes")
+public class ClienteController {
+    @Autowired
+    private ClienteRepository clienteRepository;
+    @Autowired
+    private ProgramService programService;
+
+    @GetMapping
+    public ResponseEntity<List<Cliente>> listarClientes() {
+        List<Cliente> clientes = clienteRepository.listarClientes();
+        return new ResponseEntity<>(clientes, HttpStatus.OK);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<Cliente> buscarCliente(@PathVariable Long id) {
+        Cliente cliente = clienteRepository.buscarClientePorId(id);
+        if(cliente != null){
+            return new ResponseEntity<>(cliente, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    @GetMapping("/{id}/livros")
+    public ResponseEntity<Map<Long, Livro>> getLivrosDoCliente(@PathVariable Long id) {
+        return ResponseEntity.ok(programService.findLivrosByClienteId(id));
+    }
+    @GetMapping("/{id}/livros/{livroId}")
+    public ResponseEntity<Livro> buscarLivro(@PathVariable Long id, @PathVariable Long livroId) {
+        Livro livro = programService.buscarLivroPorId(id, livroId);
+         // Verifica se o livro existe antes de tentar atualizá-lo
+        if(livro != null){
+            return new ResponseEntity<>(livro, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    @PostMapping
+    public ResponseEntity<Cliente> adicionarCliente(@RequestBody Cliente newCliente) {
+        // Verifica se o cliente já existe antes de tentar adicioná-lo
+        for (Cliente cliente : clienteRepository.listarClientes()) {
+            if (cliente.getEmail().equals(newCliente.getEmail())) {
+                return new ResponseEntity<>(HttpStatus.CONFLICT); // Retorna 409 se o cliente já existir
+            }
+        }
+        // Adiciona o cliente ao repositório se não existir
+        Cliente clienteAdicionado = clienteRepository.adicionarCliente(newCliente);
+        return new ResponseEntity<>(clienteAdicionado, HttpStatus.CREATED);
+    }
+    @PostMapping("/{id}/livros")
+    public ResponseEntity<Livro> adicionarLivro(@PathVariable long id, @RequestBody Livro newLivro) {
+        try{
+            Livro livroAdicionado = programService.criarLivroParaCliente(id, newLivro);
+            return new ResponseEntity<>(livroAdicionado, HttpStatus.CREATED);
+        }catch(IllegalArgumentException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se o cliente não for encontrado
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Retorna 500 se ocorrer erro
+        }
+    }
+    @PatchMapping("{id}/atualizarCargaLeitura/{newCarga}")
+    public ResponseEntity<Cliente> atualizarCargaHoraria(@PathVariable Long id, @PathVariable Double newCarga){
+        Cliente cliente = clienteRepository.buscarClientePorId(id);
+        if (cliente != null) {
+            cliente.setCargaDiaria(newCarga); // Atualiza a carga diária de leitura para um livro
+            Cliente clienteSalvo = clienteRepository.atualizarCliente(cliente); // Salvar o livro no repositório
+            return new ResponseEntity<>(clienteSalvo, HttpStatus.OK); // Retorna o livro atualizado
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se o livro não for encontrado
+        }
+    }
+    @PatchMapping("{id}/atualizarStatus/{livroId}")
+    public ResponseEntity<Livro> atualizarStatus(@PathVariable Long id, @PathVariable Long livroId) {
+        Livro livroAtualizado = programService.atualizarStatusLivro(id, livroId);
+         // Verifica se o livro existe antes de tentar atualizá-lo
+        if (livroAtualizado != null) {
+            return new ResponseEntity<>(livroAtualizado, HttpStatus.OK); // Retorna o livro atualizado
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se o livro não for encontrado
+        }
+    }
+    @PutMapping("{id}/atualizarData/{livroId}")
+    public ResponseEntity<Livro> atualizarData(@PathVariable Long id, @PathVariable Long livroId){
+        Livro livro = programService.atualizarDataLeitura(id, livroId);
+        if (livro != null) {
+            return new ResponseEntity<>(livro, HttpStatus.OK); // Retorna o livro atualizado
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se o livro não for encontrado
+        }
+    }
+    @DeleteMapping("{id}/deleteLivro/{livroId}")
+    public ResponseEntity<Void> delete(@PathVariable Long id, @PathVariable Long livroId) {
+        // Verifica se o livro existe antes de tentar excluí-lo
+        if(programService.buscarLivroPorId(id, livroId) != null) {
+            programService.deleteLivroParaCliente(id, livroId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Retorna 204 No Content após a exclusão
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se o livro não for encontrado
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        // Verifica se o livro existe antes de tentar excluí-lo
+        if(clienteRepository.buscarClientePorId(id) != null) {
+            clienteRepository.delete(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Retorna 204 No Content após a exclusão
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se o livro não for encontrado
+    }
+}
+package com.trabalho.leitura.service;
+
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import com.trabalho.leitura.model.Cliente;
+import com.trabalho.leitura.model.Livro;
+import com.trabalho.leitura.model.TempoLeitura;
+import com.trabalho.leitura.repository.ClienteRepository;
+import com.trabalho.leitura.repository.LivroRepository;
+
+@Service
+public class ProgramService {
+    // Injeção de dependências para os repositórios de cliente e livro
+    private final ClienteRepository clienteRepository;
+    private final LivroRepository livroRepository;
+
+    // Construtor da classe que recebe os repositórios como parâmetros
+    public ProgramService(ClienteRepository clienteRepository, LivroRepository livroRepository) {
+        this.clienteRepository = clienteRepository;
+        this.livroRepository = livroRepository;
+    }
+    // Método que retorna todos os livros de um cliente específico
+    public Map<Long, Livro> findLivrosByClienteId(Long clienteId) {
+        Cliente cliente = clienteRepository.buscarClientePorId(clienteId);
+        return cliente.getLivros(); // Retorna a lista de livros do cliente
+    }
+    // Método que cria um novo livro para um cliente específico
+    public Livro criarLivroParaCliente(Long clienteId, Livro livro) {
+        try{
+            Cliente cliente = clienteRepository.buscarClientePorId(clienteId);
+            if(cliente == null){
+                throw new IllegalArgumentException("Cliente não encontrado"); // Lança exceção se o cliente não for encontrado
+            }
+            // Verifica se o livro já existe no repositório
+            Livro livroExistente = livroRepository.verificarLivros(livro.getTitulo(), livro.getAutor(), livro.getEditora(), livro.getAnoPublicacao());
+            if(livroExistente != null){
+                livro.setId(livroExistente.getId()); // Se o livro já existe, reutiliza o ID existente
+            } else{
+                livroRepository.adicionarLivro(livro); // Adiciona o livro ao repositório se não existir
+            }
+            cliente.addLivro(livro); // Associa o livro ao cliente
+            livro.setDono(cliente); // Define o cliente como dono do livro
+            livro.setTempo(new TempoLeitura(livro));
+            return livro; // Se o livro já existe, retorna o livro existente
+        }catch(Exception e){
+            throw new RuntimeException("Erro ao criar livro para cliente: " + e.getMessage(), e); // Lança exceção se ocorrer erro
+        }
+    }
+    // Método que busca um livro específico de um cliente com base no ID do cliente e do livro
+    public Livro buscarLivroPorId(Long idCliente, Long idLivro) {
+        Cliente cliente = clienteRepository.buscarClientePorId(idCliente);
+        Livro livro = cliente.getLivros().get(idLivro); // Busca o livro pelo ID
+        return livro; // Retorna o livro do cliente
+    }
+    // Método que atualiza o status de leitura de um livro específico de um cliente com base no ID do cliente e do livro
+    public Livro atualizarStatusLivro(Long idCliente, Long idLivro) {
+        Cliente cliente = clienteRepository.buscarClientePorId(idCliente);
+        if (cliente == null) {
+            throw new IllegalArgumentException("Cliente não encontrado"); // Lança exceção se o cliente não for encontrado
+        }
+        Livro livro = cliente.getLivros().get(idLivro); // Busca o livro pelo ID
+        livro.marcarComoLido(); // Marca o livro como lido
+        cliente.getLivros().put(livro.getId(), livro); // Atualiza o livro do cliente
+        clienteRepository.atualizarCliente(cliente); // Atualiza o cliente no repositório
+        return livro; // Retorna o livro atualizado
+    }
+    // Método que atualiza a data de leitura de um livro específico de um cliente com base no ID do cliente e do livro
+    public Livro atualizarDataLeitura(Long clienteId, Long livroId) {
+        Cliente cliente = clienteRepository.buscarClientePorId(clienteId);
+        // Verifica se o cliente existe
+        if (cliente == null) {
+            throw new IllegalArgumentException("Cliente não encontrado");
+        } else{
+        Livro livro = cliente.getLivros().get(livroId); // Busca o livro pelo ID
+        TempoLeitura newTime = new TempoLeitura(livro); // Cria um novo objeto TempoLeitura
+        livro.setTempo(newTime); // Atualiza a data de leitura do livro
+        cliente.setLivro(livro); // Atualiza o livro do cliente
+        clienteRepository.atualizarCliente(cliente); // Atualiza o cliente no repositório
+        return livro; // Retorna o livro atualizado
+        }
+    }
+    // Método que remove um livro específico de um cliente com base no ID do cliente e do livro
+    public void deleteLivroParaCliente(Long idCliente, Long idLivro) {
+        clienteRepository.buscarClientePorId(idCliente).removerLivro(livroRepository.buscarLivroPorId(idLivro)); // Remove o livro do cliente
+    }
+}
