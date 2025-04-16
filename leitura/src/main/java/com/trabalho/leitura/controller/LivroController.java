@@ -40,7 +40,7 @@ public class LivroController {
     
     @PutMapping("/{id}")
     public ResponseEntity<Livro> atualizarLivro(@PathVariable Long id, @RequestBody Livro livroAtualizado) {
-        Livro livro = programRepository.atualizarLivro(id, livroAtualizado);
+        Livro livro = programRepository.atualizarLivro(livroAtualizado);
         if (livro != null) {
             return new ResponseEntity<>(livro, HttpStatus.OK); // Retorna o livro atualizado
         } else {

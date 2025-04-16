@@ -35,9 +35,9 @@ public class LivroRepository {
     }
 
     // Método que atualiza um livro existente com base no ID
-    public Livro atualizarLivro(Long id, Livro livroAtualizado) {
-        if (livros.containsKey(id)) { // Verifica se o livro existe
-            livros.put(id, livroAtualizado); // Atualiza o livro no repositório
+    public Livro atualizarLivro(Livro livroAtualizado) {
+        if (livros.containsKey(livroAtualizado.getId())) { // Verifica se o livro existe
+            livros.put(livroAtualizado.getId(), livroAtualizado); // Atualiza o livro no repositório
             return livroAtualizado; // Retorna o livro atualizado
         }
         return null; // Retorna null se o livro não foi encontrado
@@ -47,7 +47,4 @@ public class LivroRepository {
     public void delete(Long id){
         livros.remove(id);
     }
-
-
-
 }

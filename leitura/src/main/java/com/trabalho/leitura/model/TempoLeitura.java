@@ -8,7 +8,7 @@ public class TempoLeitura {
     private LocalDate dataFinal; // Data final da leitura no formato "dd/MM/yyyy"
 
     public TempoLeitura(Livro livro) {
-        this.cargaHoraria = livro.getNumeroPaginas() * (40/60) ; // Inicializa e calcula a carga horária total de leitura em minutos
+        this.cargaHoraria = livro.getNumeroPaginas() * (40.0/60.0) ; // Inicializa e calcula a carga horária total de leitura em minutos
         this.dataInicio = LocalDate.now(); // Data atual
         this.dataFinal = dataInicio.plusDays((long)(cargaHoraria/livro.getDono().getCargaDiaria())); // Data de término da leitura
     }

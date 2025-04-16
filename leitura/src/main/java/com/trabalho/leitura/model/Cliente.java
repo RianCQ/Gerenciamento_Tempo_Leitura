@@ -1,5 +1,6 @@
 package com.trabalho.leitura.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 //import java.text.DateFormat;
@@ -19,14 +20,17 @@ public class Cliente {
         this.nome = nome;
         this.email = email;
         this.cargaDiaria = cargaDiaria; // Inicializa a carga horária diária de leitura
+        this.livros = new ArrayList<>();
     }
 
     public Long getId() {
         return id.longValue(); // Retorna o ID do cliente
     }
+
     public void setId(Long id) {
         this.id = id; // Atualiza o ID do cliente
     }
+
     public String getNome() {
         return nome;
     }
@@ -46,12 +50,19 @@ public class Cliente {
     public List<Livro> getLivros() {
         return livros; // Retorna a lista de livros do cliente
     }
-    public void adicionarLivro(Livro livro) {
-        this.livros.add(livro); // Adiciona um livro à lista de livros do cliente
+    public void addLivro(Livro livro) {
+        if(!this.livros.contains(livro)){ // Verifica se o livro já está na lista
+            this.livros.add(livro); // Adiciona um livro à lista de livros do cliente
+            livro.setDono(this); // Associa o cliente como dono do livro
+        }
     }
     public void removerLivro(Livro livro) {
-        this.livros.remove(livro); // Remove um livro da lista de livros do cliente
+        if (this.livros.contains(livro)) { // Verifica se o livro está na lista
+            this.livros.remove(livro); // Remove o livro da lista de livros do cliente
+            livro.setDono(null); // Remove a associação do cliente com o livro
+        }
     }
+
 
     public void imprimirDados() {
         //DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy"); // Formato da data
