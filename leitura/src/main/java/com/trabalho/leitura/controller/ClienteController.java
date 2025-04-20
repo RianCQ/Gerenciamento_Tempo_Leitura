@@ -10,8 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-//import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/clientes")
@@ -36,7 +36,7 @@ public class ClienteController {
         }
     }
     @GetMapping("/{id}/livros")
-    public ResponseEntity<List<Livro>> getLivrosDoCliente(@PathVariable Long id) {
+    public ResponseEntity<Map<Long, Livro>> getLivrosDoCliente(@PathVariable Long id) {
         return ResponseEntity.ok(programService.findLivrosByClienteId(id));
     }
     @GetMapping("/{id}/livros/{livroId}")
@@ -51,6 +51,13 @@ public class ClienteController {
     }
     @PostMapping
     public ResponseEntity<Cliente> adicionarCliente(@RequestBody Cliente newCliente) {
+        // Verifica se o cliente já existe antes de tentar adicioná-lo
+        for (Cliente cliente : clienteRepository.listarClientes()) {
+            if (cliente.getEmail().equals(newCliente.getEmail())) {
+                return new ResponseEntity<>(HttpStatus.CONFLICT); // Retorna 409 se o cliente já existir
+            }
+        }
+        // Adiciona o cliente ao repositório se não existir
         Cliente clienteAdicionado = clienteRepository.adicionarCliente(newCliente);
         return new ResponseEntity<>(clienteAdicionado, HttpStatus.CREATED);
     }
@@ -63,15 +70,6 @@ public class ClienteController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se o cliente não for encontrado
         }catch(Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Retorna 500 se ocorrer erro
-        }
-    }
-    @PutMapping("/{id}/livros/{livroId}")
-    public ResponseEntity<Livro> atualizarLivro(@PathVariable Long id, @PathVariable Long livroId, @RequestBody Livro livroAtualizado) {
-        Livro livro = programService.atualizarLivro(id, livroAtualizado);
-        if (livro != null) {
-            return new ResponseEntity<>(livro, HttpStatus.OK); // Retorna o livro atualizado
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se o livro não for encontrado
         }
     }
     @PatchMapping("{id}/atualizarCargaLeitura/{newCarga}")
@@ -87,24 +85,19 @@ public class ClienteController {
     }
     @PatchMapping("{id}/atualizarStatus/{livroId}")
     public ResponseEntity<Livro> atualizarStatus(@PathVariable Long id, @PathVariable Long livroId) {
-        Livro livro = programService.buscarLivroPorId(id, livroId);
+        Livro livroAtualizado = programService.atualizarStatusLivro(id, livroId);
          // Verifica se o livro existe antes de tentar atualizá-lo
-        if (livro != null) {
-            livro.marcarComoLido(); // Marca o livro como lido
-            Livro livroSalvo = programService.atualizarLivro(id, livro); // Atualizar o livro para o cliente
-            return new ResponseEntity<>(livroSalvo, HttpStatus.OK); // Retorna o livro atualizado
+        if (livroAtualizado != null) {
+            return new ResponseEntity<>(livroAtualizado, HttpStatus.OK); // Retorna o livro atualizado
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se o livro não for encontrado
         }
     }
     @PutMapping("{id}/atualizarData/{livroId}")
     public ResponseEntity<Livro> atualizarData(@PathVariable Long id, @PathVariable Long livroId){
-        Livro livro = programService.buscarLivroPorId(id, livroId);
-         // Verifica se o livro existe antes de tentar atualizá-lo
+        Livro livro = programService.atualizarDataLeitura(id, livroId);
         if (livro != null) {
-            livro.getTempo().novaDataFinal(); // Atualiza a data de leitura do livro
-            Livro livroSalvo = programService.atualizarLivro(id, livro); // Salvar o livro no repositório
-            return new ResponseEntity<>(livroSalvo, HttpStatus.OK); // Retorna o livro atualizado
+            return new ResponseEntity<>(livro, HttpStatus.OK); // Retorna o livro atualizado
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se o livro não for encontrado
         }

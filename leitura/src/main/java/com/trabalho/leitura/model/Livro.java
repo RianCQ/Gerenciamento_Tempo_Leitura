@@ -34,25 +34,25 @@ public class Livro {
         this.dono = dono; // Atualiza o cliente que possui o livro
     }
     public Long getId() {
-        return id;
+        return id; // Retorna o ID do livro
     }
     public void setId(Long id){
-        this.id = id;
+        this.id = id; // Atualiza o ID do livro
     }
     public String getTitulo() {
-        return titulo;
+        return titulo; // Retorna o título do livro
     }
     public String getAutor() {
-        return autor;
+        return autor; // Retorna o autor do livro
     }
     public String getEditora() {
-        return editora;
+        return editora; // Retorna a editora do livro
     }
     public int getAnoPublicacao() {
-        return anoPublicacao;
+        return anoPublicacao; // Retorna o ano de publicação do livro
     }
     public int getNumeroPaginas() {
-        return numeroPaginas;
+        return numeroPaginas; // Retorna o número de páginas do livro
     }
     public TempoLeitura getTempo() {
         return tempo; // Retorna o tempo que compõe o livro
@@ -61,9 +61,9 @@ public class Livro {
         this.tempo = tempo; // Atualiza o tempo de leitura do livro
     }
     public boolean isLido() {
-        return lido;
+        return lido; // Retorna se o livro foi lido ou não
     }
     public void marcarComoLido() {
-        this.lido = true;
+        this.lido = true; // Marca o livro como lido
     }
 }

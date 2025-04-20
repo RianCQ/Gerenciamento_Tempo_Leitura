@@ -2,7 +2,6 @@ package com.trabalho.leitura.repository;
 
 import org.springframework.stereotype.Repository;
 import com.trabalho.leitura.model.Cliente;
-import com.trabalho.leitura.service.ProgramService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +35,7 @@ public class ClienteRepository {
         return cliente; // Retorna o cliente adicionado
     }
 
+    // Método que atualiza um cliente existente com base no ID
     public Cliente atualizarCliente(Cliente clienteAtualizado) {
         if (clientes.containsKey(clienteAtualizado.getId())) { // Verifica se o cliente existe
             clientes.put(clienteAtualizado.getId(), clienteAtualizado); // Atualiza o cliente no repositório
@@ -43,14 +43,6 @@ public class ClienteRepository {
         }
         return null; // Retorna null se o cliente não foi encontrado
     }
-    // Método que atualiza um cliente existente com base no ID
-    /*public Cliente atualizarLivro(Long id, Cliente clienteAtualizado) {
-        if (clientes.containsKey(id)) { // Verifica se o livro existe
-            clientes.put(id, clienteAtualizado); // Atualiza o livro no repositório
-            return clienteAtualizado; // Retorna o livro atualizado
-        }
-        return null; // Retorna null se o livro não foi encontrado
-    }*/
 
     //Método que remove um cliente existente com base no ID
     public void delete(Long id){

@@ -1,6 +1,6 @@
 package com.trabalho.leitura.service;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ public class ProgramService {
         this.clienteRepository = clienteRepository;
         this.livroRepository = livroRepository;
     }
-    public List<Livro> findLivrosByClienteId(Long clienteId) {
+    public Map<Long, Livro> findLivrosByClienteId(Long clienteId) {
         Cliente cliente = clienteRepository.buscarClientePorId(clienteId);
         return cliente.getLivros(); // Retorna a lista de livros do cliente
     }
@@ -42,13 +42,40 @@ public class ProgramService {
     }
     public Livro buscarLivroPorId(Long idCliente, Long idLivro) {
         Cliente cliente = clienteRepository.buscarClientePorId(idCliente);
-        Livro livro = cliente.getLivros().get(idLivro.intValue()); // Busca o livro pelo ID
+        Livro livro = cliente.getLivros().get(idLivro); // Busca o livro pelo ID
         return livro; // Retorna o livro do cliente
     }
-    public Livro atualizarLivro(Long idCliente, Livro livroAtualizado) {
+    public Livro atualizarStatusLivro(Long idCliente, Long idLivro) {
         Cliente cliente = clienteRepository.buscarClientePorId(idCliente);
-        cliente.getLivros().set(livroAtualizado.getId().intValue(), livroAtualizado); // Atualiza o livro do cliente
-        return livroAtualizado; // Retorna o livro atualizado
+        if (cliente == null) {
+            throw new IllegalArgumentException("Cliente não encontrado"); // Lança exceção se o cliente não for encontrado
+        }
+        Livro livro = cliente.getLivros().get(idLivro); // Busca o livro pelo ID
+        livro.marcarComoLido(); // Marca o livro como lido
+        cliente.getLivros().put(livro.getId(), livro); // Atualiza o livro do cliente
+        clienteRepository.atualizarCliente(cliente); // Atualiza o cliente no repositório
+        return livro; // Retorna o livro atualizado
+    }
+    public Livro atualizarDataLeitura(Long clienteId, Long livroId) {
+        Cliente cliente = clienteRepository.buscarClientePorId(clienteId);
+        // Verifica se o cliente existe
+        if (cliente == null) {
+            throw new IllegalArgumentException("Cliente não encontrado");
+        } else{
+        Livro livro = cliente.getLivros().get(livroId); // Busca o livro pelo ID
+        TempoLeitura newTime = new TempoLeitura(livro); // Cria um novo objeto TempoLeitura
+        livro.setTempo(newTime); // Atualiza a data de leitura do livro
+        cliente.setLivro(livro);
+        clienteRepository.atualizarCliente(cliente); // Atualiza o cliente no repositório
+        return livro; // Retorna o livro atualizado
+        }
+    }
+    public void atualizarStatus(Long clienteId, Long livroId) {
+        Cliente cliente = clienteRepository.buscarClientePorId(clienteId);
+        Livro livro = cliente.getLivros().get(livroId); // Busca o livro pelo ID
+        livro.marcarComoLido(); // Marca o livro como lido
+        cliente.setLivro(livro); // Atualiza o livro do cliente
+        clienteRepository.atualizarCliente(cliente); // Atualiza o cliente no repositório
     }
     public void deleteLivroParaCliente(Long idCliente, Long idLivro) {
         clienteRepository.buscarClientePorId(idCliente).removerLivro(livroRepository.buscarLivroPorId(idLivro)); // Remove o livro do cliente
